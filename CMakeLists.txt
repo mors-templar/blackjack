@@ -11,8 +11,9 @@ qt_add_executable(blackjack_twist
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
-    welcome.h welcome.cpp welcome.ui
-    installwizard.h installwizard.cpp installwizard.ui
+    welcome.h
+    welcome.cpp
+    welcome.ui
 )
 
 target_link_libraries(blackjack_twist
