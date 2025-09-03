@@ -17,7 +17,7 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="introPage">
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -111,7 +111,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;li style=&quot; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:6px; margin-left:20px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Standard Blackjack with a twist. &lt;/li&gt;
 &lt;li style=&quot; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:6px; margin-left:20px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;You pick a folder on your system to wager. &lt;/li&gt;
 &lt;li style=&quot; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:6px; margin-left:20px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;If you win:&lt;/span&gt; you keep the folder. &lt;/li&gt;
-&lt;li style=&quot; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:6px; margin-left:20px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;If you lose:&lt;/span&gt; the folder is gone forever. &lt;/li&gt;
+&lt;li style=&quot; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:6px; margin-left:20px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;If you lose:&lt;/span&gt; IF your balance hits 0 and the folder is gone forever. &lt;/li&gt;
 &lt;li style=&quot; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:14px; margin-left:20px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Starting balance: &lt;span style=&quot; font-weight:700;&quot;&gt;$10,000&lt;/span&gt; (same as Easy). &lt;/li&gt;&lt;/ul&gt;
 &lt;h3 style=&quot; margin-top:16px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:700;&quot;&gt;🔴 Hard &lt;/span&gt;&lt;/h3&gt;
 &lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;
@@ -120,9 +120,31 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;li style=&quot; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:6px; margin-left:20px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Your balance equals the &lt;span style=&quot; font-weight:700;&quot;&gt;number of files&lt;/span&gt; in that folder. &lt;/li&gt;
 &lt;li style=&quot; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:6px; margin-left:20px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Each bet risks your files. &lt;/li&gt;
 &lt;li style=&quot; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:6px; margin-left:20px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Win:&lt;/span&gt; you keep them. &lt;/li&gt;
-&lt;li style=&quot; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:14px; margin-left:20px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Lose:&lt;/span&gt; files are permanently deleted. &lt;/li&gt;&lt;/ul&gt;
+&lt;li style=&quot; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:14px; margin-left:20px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Lose:&lt;/span&gt; Your bet is the number of files that are permanently deleted. &lt;/li&gt;&lt;/ul&gt;
 &lt;hr /&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:700; color:#ff0000;&quot;&gt;⚠️ Warning: The Normal and Hard modes are destructive. Play at your own risk!&lt;/span&gt; &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="difficuiltyradiolabel">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Shadow::Plain</enum>
+         </property>
+         <property name="text">
+          <string>NOW AFTER READING PICK THE DIFFICUILTY YOU WANT</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::TextFormat::PlainText</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
        </item>
