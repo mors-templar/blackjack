@@ -185,6 +185,13 @@ QStatusBar {
      </spacer>
     </item>
     <item>
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="text">
+       <string>Bet</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="controlsLayout">
       <item>
        <widget class="QPushButton" name="hitButton">
