@@ -169,6 +169,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <property name="text">
           <string>Normal</string>
          </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
        <item>
@@ -202,6 +205,37 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </property>
          <property name="text">
           <string> Select a Sacrificial folder</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="font">
+          <font>
+           <italic>true</italic>
+           <underline>true</underline>
+          </font>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Shape::Box</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Shadow::Plain</enum>
+         </property>
+         <property name="lineWidth">
+          <number>1</number>
+         </property>
+         <property name="midLineWidth">
+          <number>1</number>
+         </property>
+         <property name="text">
+          <string>NOTE: CLICK NEXT IF YOU CHOOSE EASY.</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignCenter</set>

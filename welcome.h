@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QString>
 #include <QStackedWidget>
-#include <string>
+#include <QFileDialog>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -27,13 +27,13 @@ private:
     // wizard state
     int currentPageIndex = 0;   // track stackedWidget index
     QString selectedFolder;     // store chosen folder
-    QString difficulty;         // "Easy", "Normal", "Hard"
+    int difficulty = 0;         // 0 = Easy, 1 = Normal, 2 = Hard
 
     // helper methods you’ll define in .cpp
     void goToNextPage();
     void goToPreviousPage();
-    void updateSummaryPage();
-    void chooseFolder();
+    void updateSummaryPage();        // no arguments
+    void chooseFolder(bool hardmode);
     void setDifficulty();
 
 private slots:
