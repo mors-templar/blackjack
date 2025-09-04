@@ -11,6 +11,7 @@ qt_add_executable(blackjack_twist
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
+
 )
 
 target_link_libraries(blackjack_twist
