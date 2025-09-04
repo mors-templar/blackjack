@@ -11,9 +11,238 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Blackjack</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow {
+    background-color: #2E8B57; /* Darker green for the main window, like a felt table */
+}
+QLabel {
+    color: #FFFFFF; /* White text for labels */
+    font-weight: bold;
+    font-size: 16px;
+}
+QPushButton {
+    background-color: #008000; /* Green buttons */
+    color: #FFFFFF; /* White text */
+    border: 2px solid #006400; /* Darker green border */
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+}
+QPushButton:hover {
+    background-color: #00A000; /* Lighter green on hover */
+}
+QPushButton:pressed {
+    background-color: #006400; /* Even darker green when pressed */
+    border-style: inset;
+}
+QStatusBar {
+    background-color: #333333; /* Dark status bar */
+    color: #DDDDDD; /* Light gray text */
+    font-size: 12px;
+}
+/* Specific styling for game status label */
+#gameStatusLabel {
+    color: #FFD700; /* Gold color for game status */
+    font-size: 18px;
+    font-style: italic;
+}
+/* Styling for the main game area container */
+#gameBoardFrame {
+    border: 5px solid #8B4513; /* Brown border */
+    border-radius: 15px; /* Slightly rounded corners for the board */
+    background-color: #2E8B57; /* Keep the green felt inside */
+}
+/* Styling for card containers (placeholders) */
+#cardPlaceholder {
+    background-color: rgba(255, 255, 255, 50); /* Semi-transparent white */
+    border: 1px solid #FFFFFF; /* White border */
+    border-radius: 5px;
+    min-width: 80px; /* Example size for a card slot */
+    min-height: 120px;
+    max-width: 80px;
+    max-height: 120px;
+}
+/* Styling for the card display areas */
+#dealerDisplayFrame, #playerDisplayFrame {
+    border: 3px solid #FFFFFF;
+    background-color: rgba(0, 0, 0, 50); /* Semi-transparent black */
+    border-radius: 10px;
+    padding: 5px;
+}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <spacer name="topSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QFrame" name="gameBoardFrame">
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="gameBoardLayout">
+       <item>
+        <widget class="QLabel" name="dealerLabel">
+         <property name="styleSheet">
+          <string notr="true">font-size: 18px;</string>
+         </property>
+         <property name="text">
+          <string>Dealer's Hand</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="dealerDisplayFrame">
+         <property name="frameShape">
+          <enum>QFrame::Shape::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Shadow::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="dealerCardLayout">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="middleSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="playerLabel">
+         <property name="styleSheet">
+          <string notr="true">font-size: 18px;</string>
+         </property>
+         <property name="text">
+          <string>Player's Hand</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="playerDisplayFrame">
+         <property name="frameShape">
+          <enum>QFrame::Shape::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Shadow::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="playerCardLayout">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <spacer name="bottomSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="controlsLayout">
+      <item>
+       <widget class="QPushButton" name="hitButton">
+        <property name="text">
+         <string>Hit</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="standButton">
+        <property name="text">
+         <string>Stand</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="newGameButton">
+        <property name="text">
+         <string>New Game</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="exitButton">
+        <property name="text">
+         <string>Exit</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="statusLayout">
+      <item>
+       <widget class="QLabel" name="balanceLabel">
+        <property name="text">
+         <string>Balance: $10000</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gameStatusLabel">
+        <property name="text">
+         <string>Place your bet!</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="betLabel">
+        <property name="text">
+         <string>Current Bet: $0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
