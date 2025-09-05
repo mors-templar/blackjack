@@ -3,6 +3,10 @@
 #include "ui_welcome.h"
 #include <QDir>
 #include <QDebug>
+#include <QDesktopServices>
+#include <QUrl>
+#include <iostream>
+#include <fstream>
 
 // constructor
 Welcome::Welcome(QWidget *parent)
@@ -10,6 +14,8 @@ Welcome::Welcome(QWidget *parent)
     ui(new Ui::Welcome)
 {
     ui->setupUi(this);
+    ui->introText->setOpenExternalLinks(true);
+    ui->textBrowser->setOpenExternalLinks(true);
 
     // initialize current page index
     currentPageIndex = 0;
@@ -83,16 +89,6 @@ void Welcome::chooseFolder(bool hardmode) {
     }
 }
 
-void Welcome::setDifficulty() {
-    if (ui->easyRadioButton->isChecked()) {
-        difficulty = 0;
-    } else if (ui->normalRadioButton->isChecked()) {
-        difficulty = 1;
-    } else if (ui->hardRadioButton->isChecked()) {
-        difficulty = 2;
-    }
-}
-
 // ---------- Slots ----------
 
 void Welcome::on_nextButton_clicked() {
@@ -104,11 +100,24 @@ void Welcome::on_backButton_clicked() {
 }
 
 void Welcome::on_finishButton_clicked() {
-    accept();   // close need more code to connect game to this
+    // Write settings to file
+    std::ofstream outFile("settings.txt");
+    if (outFile.is_open()) {
+        outFile << difficulty << "\n";                // line 1: difficulty
+        outFile << selectedFolder.toStdString() << "\n"; // line 2: folder
+        outFile.close();
+    }
+
+    std::cout << "Saved settings:\n"
+              << "Difficulty: " << difficulty << "\n"
+              << "Folder: " << selectedFolder.toStdString() << std::endl;
+
+    accept();
 }
 
 void Welcome::on_browseButton_clicked() {
-    chooseFolder(difficulty == 2);
+    if(difficulty == 1)chooseFolder(false);
+    else chooseFolder(true);
 }
 
 void Welcome::on_easyRadioButton_clicked() {

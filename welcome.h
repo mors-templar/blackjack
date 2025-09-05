@@ -15,16 +15,14 @@ QT_END_NAMESPACE
 class Welcome : public QDialog
 {
     Q_OBJECT
-
 public:
     explicit Welcome(QWidget *parent = nullptr);
     ~Welcome();
 
-private:
-    // pointer to the generated UI
-    Ui::Welcome *ui;
+    void getsettings();
 
-    // wizard state
+private:
+    Ui::Welcome *ui;    // wizard state
     int currentPageIndex = 0;   // track stackedWidget index
     QString selectedFolder;     // store chosen folder
     int difficulty = 0;         // 0 = Easy, 1 = Normal, 2 = Hard
@@ -32,9 +30,8 @@ private:
     // helper methods you’ll define in .cpp
     void goToNextPage();
     void goToPreviousPage();
-    void updateSummaryPage();        // no arguments
+    void updateSummaryPage();
     void chooseFolder(bool hardmode);
-    void setDifficulty();
 
 private slots:
     // slots for button actions
@@ -48,5 +45,6 @@ private slots:
     void on_normalRadioButton_clicked();
     void on_hardRadioButton_clicked();
 };
+
 
 #endif // WELCOME_H
