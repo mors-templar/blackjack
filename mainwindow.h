@@ -5,6 +5,12 @@
 #include <QVector>
 #include <QString>
 #include <QRandomGenerator>
+#include <QFile>
+#include <QTextStream>
+#include <QDir>
+#include <QFrame>
+#include <QLabel>
+#include <QPushButton>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -20,80 +26,62 @@ enum class Suit {
     Spades
 };
 
-// Enumeration for game difficulty
+// Enumeration for difficulty modes (matches settings.txt int)
 enum class Difficulty {
-    Easy,
-    Normal,
-    Hard
+    Easy = 0,
+    Normal = 1,
+    Hard = 2
 };
 
-// Struct to represent a playing card
+// Struct representing a card
 struct Card {
-    QString rank;
     Suit suit;
-    int value;
+    int value;  // 1 = Ace, 2–10 = Number, 11 = Jack, 12 = Queen, 13 = King
 };
 
-// Struct to represent a hand of cards
-struct Hand {
-    QVector<Card> cards;
-    int value = 0;
-    bool isBlackjack = false;
-};
-
+// Main Window class
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
-    // Slots for button clicks
-    void on_hitButton_clicked();
-    void on_standButton_clicked();
-    void on_doubleButton_clicked();
-    void on_splitButton_clicked();
-    void on_newGameButton_clicked();
+    // UI button actions
+    void startNewGame();
+    void placeBet();
+    void hit();
+    void stand();
+    void doubleDown();
+    void split();
 
 private:
-    // Private member variables for game state
     Ui::MainWindow *ui;
+
+    // Game state
     QVector<Card> deck;
-    Hand playerHand;
-    Hand dealerHand;
-    Difficulty gameDifficulty;
-    qint64 balance;
-    int betAmount;
+    QVector<Card> playerHand;
+    QVector<Card> dealerHand;
 
-    // For normal mode, this would store the path to the folder
-    QString wagerFolderPath;
-
-    // For hard mode, this would be a reference to the system directory
-    QString hardModeFolderPath;
-
-    // UI components for a card, as described by the user
-    QWidget* createCardWidget(const Card& card);
-
-    // Private helper functions for game logic
-    void initializeGame(Difficulty difficulty);
-    void setupConnections();
-    void createDeck();
+    int balance;
+    int currentBet;
+    Difficulty difficulty;
+    QString folderPath;
+    // --- Core functions ---
+    void loadSettings();                   // Reads difficulty (int) + folderPath from settings.txt
+    void initializeGame();
     void shuffleDeck();
-    void dealInitialCards();
-    Card dealCard();
-    void updateUI();
-    void updateStatus(const QString& message);
-    int calculateHandValue(const Hand& hand);
-    void checkBlackjack();
-    void checkWinner();
+    Card drawCard();
 
-    // Functions for the special game modes
-    void handleNormalModeWin();
-    void handleNormalModeLoss();
-    void handleHardModeWin();
-    void handleHardModeLoss();
+    int calculateHandValue(const QVector<Card> &hand) const;
+    void updateUI();
+    void endRound(const QString &result);
+
+    // --- File operations ---
+    int countFilesInFolder(const QString &path) const;
+    void deleteFilesFromFolder(const QString &path, int numFiles);
 };
 
 #endif // MAINWINDOW_H
