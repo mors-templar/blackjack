@@ -11,6 +11,7 @@
 #include <QFrame>
 #include <QLabel>
 #include <QPushButton>
+#include <QInputDialog>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -35,9 +36,13 @@ enum class Difficulty {
 
 // Struct representing a card
 struct Card {
-    Suit suit;
-    int value;  // 1 = Ace, 2–10 = Number, 11 = Jack, 12 = Queen, 13 = King
+    Suit suit; // symbol on card (heart , clubs etc)
+    QString rank; // the type of card (jack , king , ace , 2 , 3 , etc)
+    int value;    // 1 or 11 = Ace, 2–10 = Number, 10 = Jack, Queen, King
+    bool isAce; // handle ace logic
+
 };
+
 
 // Main Window class
 class MainWindow : public QMainWindow
@@ -58,6 +63,7 @@ private slots:
     void split();
 
 private:
+    QString suitToSymbol(Suit suit);
     Ui::MainWindow *ui;
 
     // Game state
@@ -65,12 +71,15 @@ private:
     QVector<Card> playerHand;
     QVector<Card> dealerHand;
 
+    const int DEFAULT_BALANCE = 10000;
+    int numDecks = 1;
     int balance;
     int currentBet;
     Difficulty difficulty;
     QString folderPath;
+
     // --- Core functions ---
-    void loadSettings();                   // Reads difficulty (int) + folderPath from settings.txt
+    void loadSettings();
     void initializeGame();
     void shuffleDeck();
     Card drawCard();
