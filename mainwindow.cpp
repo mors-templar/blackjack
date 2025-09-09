@@ -81,8 +81,9 @@ void MainWindow::initializeGame()
 
     //init all UI elemetns
     ui->balanceLabel->setText("Balance: $" + QString::number(balance));
-    ui->balanceLabel->setText("Current bet: $" + QString::number(currentBet));
+    ui->betLabel->setText("Current bet: $" + QString::number(currentBet));
     ui->gameStatusLabel->setText("Place Your Bets");
+    ui->gameStatusLabel->setStyleSheet("color: #FFD700;");
     ui->playerLabel->setText("Player Hand Value: 0");
     ui->dealerLabel->setText("Dealer Hand Value: 0");
 
@@ -103,13 +104,13 @@ void MainWindow::initializeGame()
         options,
         0,      // default index = 0 ("1")
         false,  // user cannot edit text
-        &ok
+        &ok // click ok to close
         );
 
     if (ok) {
         numDecks = choice.toInt();
     } else {
-        numDecks = 1; // fallback default
+        numDecks = 1;
     }
 
 }
@@ -180,13 +181,49 @@ int MainWindow::calculateHandValue(const QVector<Card> &hand) const
 
 void MainWindow::updateUI()
 {
-
-    // TODO: Update balanceLabel, betLabel, gameStatusLabel
-    // TODO: Refresh dealer and player card displays
+    ui->gameStatusLabel->setStyleSheet("color:FFD700;");
+    ui->balanceLabel->setText("Balance: $" + QString::number(balance));
+    ui->betLabel->setText("Current Bet: $" + QString::number(currentBet));
+    ui->dealerLabel->setText("Dealer's Hand Value:"+ QString::number(calculateHandValue(dealerHand)));
+    ui->playerLabel->setText("Player's Hand Value:"+ QString::number(calculateHandValue(playerHand)));
 }
 
-void MainWindow::endRound(const QString &result)
+void MainWindow::endRound(bool UserBust , bool DealerBust)
 {
+    // if bust
+    if(UserBust){
+        balance -= currentBet;
+        ui->gameStatusLabel->setText("You Busted!");
+        ui->gameStatusLabel->setStyleSheet("color: red;");
+        ui->hitButton->setEnabled(false);
+        ui->doubleButton->setEnabled(false);
+        ui->splitButton->setEnabled(false);
+        ui->standButton->setEnabled(false);
+    } else {
+        if(playerHand.size() == 2 && dealerHand.size() == 2 ){
+            int p_hand = calculateHandValue(playerHand);
+            int d_hand = calculateHandValue(dealerHand);
+            // tie with blackjack for both
+            if(p_hand == 21 && d_hand == 21){
+                ui->gameStatusLabel->setText("Tie!");
+                ui->gameStatusLabel->setStyleSheet("color:FFD700;");
+                ui->hitButton->setEnabled(false);
+                ui->doubleButton->setEnabled(false);
+                ui->splitButton->setEnabled(false);
+                ui->standButton->setEnabled(false);
+            }
+            //
+            else if(p_hand == 21 && d_hand != 21){
+                balance += currentBet * 1.5; // 3:2 odds
+                ui->gameStatusLabel->setText("You won");
+                ui->gameStatusLabel->setStyleSheet("color:green;");
+                ui->hitButton->setEnabled(false);
+                ui->doubleButton->setEnabled(false);
+                ui->splitButton->setEnabled(false);
+                ui->standButton->setEnabled(false);
+            }
+        }
+    }
     // TODO: Apply win/loss logic
     // TODO: Update balance
     // TODO: Apply folder/file deletion if Normal/Hard

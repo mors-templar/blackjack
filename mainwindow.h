@@ -86,7 +86,7 @@ private:
 
     int calculateHandValue(const QVector<Card> &hand) const;
     void updateUI();
-    void endRound(const QString &result);
+    void endRound(bool UserBust , bool DealerBust);
 
     // --- File operations ---
     int countFilesInFolder(const QString &path) const;
