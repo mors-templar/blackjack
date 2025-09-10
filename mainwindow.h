@@ -3,23 +3,18 @@
 
 #include <QMainWindow>
 #include <QVector>
-#include <QString>
-#include <QRandomGenerator>
-#include <QFile>
-#include <QTextStream>
-#include <QDir>
-#include <QFrame>
 #include <QLabel>
-#include <QPushButton>
+#include <QMessageBox>
 #include <QInputDialog>
+#include <QFile>
+#include <QDir>
+#include <QTextStream>
+#include <QRandomGenerator>
 
 QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
-}
+namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-// Enumeration for card suits
 enum class Suit {
     Hearts,
     Diamonds,
@@ -27,34 +22,28 @@ enum class Suit {
     Spades
 };
 
-// Enumeration for difficulty modes (matches settings.txt int)
-enum class Difficulty {
-    Easy = 0,
-    Normal = 1,
-    Hard = 2
-};
-
-// Struct representing a card
 struct Card {
-    Suit suit; // symbol on card (heart , clubs etc)
-    QString rank; // the type of card (jack , king , ace , 2 , 3 , etc)
-    int value;    // 1 or 11 = Ace, 2–10 = Number, 10 = Jack, Queen, King
-    bool isAce; // handle ace logic
-
+    QString rank;
+    Suit suit;
+    int value;
+    bool isAce;
 };
 
+enum class Difficulty {
+    Easy,
+    Normal,
+    Hard
+};
 
-// Main Window class
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
-    // UI button actions
     void startNewGame();
     void placeBet();
     void hit();
@@ -63,32 +52,45 @@ private slots:
     void split();
 
 private:
-    QString suitToSymbol(Suit suit);
     Ui::MainWindow *ui;
 
     // Game state
     QVector<Card> deck;
     QVector<Card> playerHand;
     QVector<Card> dealerHand;
+    QList<QWidget*> dealerCardWidgets;
+    QList<QWidget*> playerCardWidgets;
 
-    const int DEFAULT_BALANCE = 10000;
-    int numDecks = 1;
+
     int balance;
     int currentBet;
+    int numDecks;
+    bool gameInProgress;
+
     Difficulty difficulty;
     QString folderPath;
 
-    // --- Core functions ---
+    // Constants
+    const int DEFAULT_BALANCE = 10000;
+
+    // Helpers
+    QString suitToSymbol(Suit suit);
+    QWidget* createCardWidget(const Card& card);
+    void clearCardDisplays();
+    void updateCardDisplays();
+    void enableGameButtons(bool enabled);
+
+    // Core game
     void loadSettings();
     void initializeGame();
     void shuffleDeck();
     Card drawCard();
-
     int calculateHandValue(const QVector<Card> &hand) const;
     void updateUI();
-    void endRound(bool UserBust , bool DealerBust);
+    void dealInitialCards();
+    void endRound(bool userBust, bool dealerBust);
 
-    // --- File operations ---
+    // File ops
     int countFilesInFolder(const QString &path) const;
     void deleteFilesFromFolder(const QString &path, int numFiles);
 };

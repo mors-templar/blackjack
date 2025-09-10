@@ -14,6 +14,8 @@ qt_add_executable(blackjack_twist
     welcome.h
     welcome.cpp
     welcome.ui
+    test
+
 )
 
 target_link_libraries(blackjack_twist

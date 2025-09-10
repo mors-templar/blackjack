@@ -1,13 +1,18 @@
-#include "mainwindow.h"
-#include "welcome.h"
 #include <QApplication>
+#include "welcome.h"
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
-    Welcome wel;
-    wel.show();
-    w.show();
-    return a.exec();
+    Welcome wizard;
+    int result = wizard.exec();
+
+    if (result == QDialog::Accepted) {
+        MainWindow w;
+        w.show();
+        return a.exec();
+    }
+
+    return 0;
 }

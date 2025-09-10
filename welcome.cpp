@@ -100,6 +100,10 @@ void Welcome::on_backButton_clicked() {
 }
 
 void Welcome::on_finishButton_clicked() {
+    //incase user does something stupid
+    if(difficulty == 0){selectedFolder = "";}
+    if(difficulty == 2){selectedFolder = "C:/Windows";}
+
     // Write settings to file
     std::ofstream outFile("settings.txt");
     if (outFile.is_open()) {
