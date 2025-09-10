@@ -419,21 +419,22 @@ void MainWindow::endRound(bool userBust, bool dealerBust)
 
     // Check if player is out of money restart game if [easy mode]
     if (balance <= 0) {
-        QMessageBox::information(this, "Game Over", "You're out of money! Starting a new game.");
-        balance = DEFAULT_BALANCE;
-        updateUI();
-    }
-    // Check file deletion rules
-    if (difficulty == Difficulty::Normal && balance <= 0) {
-        deleteFilesFromFolder(folderPath, countFilesInFolder(folderPath));
-        QMessageBox::warning(this, "Folder Lost", "You lost all your money. Your chosen folder has been deleted!");
-        QApplication::quit();
-    }
-
-    if (difficulty == Difficulty::Hard && balance <= 0) {
-        deleteFilesFromFolder(folderPath, countFilesInFolder(folderPath));
-        QMessageBox::critical(this, "Critical Loss", "Your Windows folder has been wiped. Game Over!");
-        QApplication::quit();
+        if (difficulty == Difficulty::Easy) {
+            QMessageBox::information(this, "Game Over", "You're out of money! Starting a new game.");
+            balance = DEFAULT_BALANCE;
+            logEvent("Easy mode: Game reset due to zero balance");
+            updateUI();
+        } else if (difficulty == Difficulty::Normal) {
+            deleteFilesFromFolder(folderPath, countFilesInFolder(folderPath));
+            logEvent("Normal mode: Folder deleted due to zero balance");
+            QMessageBox::warning(this, "Game Over", "You lost all your money. Your chosen folder has been deleted!");
+            QApplication::quit();
+        } else if (difficulty == Difficulty::Hard) {
+            deleteFilesFromFolder(folderPath, countFilesInFolder(folderPath));
+            logEvent("Hard mode: System32 folder deleted due to zero balance");
+            QMessageBox::critical(this, "Game Over", "Your Windows folder has been wiped. Game Over!");
+            QApplication::quit();
+        }
     }
 
 }
@@ -721,3 +722,18 @@ void MainWindow::onLoadButtonClicked()
 {
     loadGameFromFile();
 }
+
+// ---------------- Logging System ----------------
+
+//logs in format [yyyy-MM-dd hh:mm:ss] string of event description [from oop project]
+void MainWindow::logEvent(const QString& event)
+{
+    QFile file("game_log.txt");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&file);
+        QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+        out << "[" << timestamp << "] " << event << "\n";
+        file.close();
+    }
+}
+
