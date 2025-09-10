@@ -3,6 +3,8 @@
 A modern take on the classic **Blackjack** game, built with **C++ and Qt6**.  
 Play safe with a starting balance… or risk your folders in higher difficulties!  
 
+Inspired by [CodeBullet’s Snake Game](https://youtu.be/2YdPIB7wVFk).  
+
 ---
 
 ## ✨ Features
@@ -31,6 +33,6 @@ No setup required — all Qt runtime files are bundled.
 You’ll need:
 - Qt 6.x (Widgets, Core, Gui, Svg modules)  
 - CMake (3.16+)  
-- A C++17-compatible compiler (MSVC / MinGW / Clang) 
-
-
+- A C++17-compatible compiler (MSVC / MinGW / Clang)  
+cmake ..
+cmake --build .
