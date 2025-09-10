@@ -34,5 +34,3 @@ You’ll need:
 - Qt 6.x (Widgets, Core, Gui, Svg modules)  
 - CMake (3.16+)  
 - A C++17-compatible compiler (MSVC / MinGW / Clang)  
-cmake ..
-cmake --build .
