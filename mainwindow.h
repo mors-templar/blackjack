@@ -3,45 +3,86 @@
 
 #include <QMainWindow>
 #include <QVector>
-#include <QLabel>
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QFile>
+#include <QString>
 #include <QDir>
+#include <QFile>
+#include <QFileInfoList>
 #include <QTextStream>
 #include <QRandomGenerator>
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QLabel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-enum class Suit {
-    Hearts,
-    Diamonds,
-    Clubs,
-    Spades
-};
-
-struct Card {
-    QString rank;
-    Suit suit;
-    int value;
-    bool isAce;
-};
-
-enum class Difficulty {
-    Easy,
-    Normal,
-    Hard
-};
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    enum class Difficulty { Easy = 0, Normal = 1, Hard = 2 };
+
+    struct Card {
+        QString rank;
+        int value = 0;
+        bool isAce = false;
+        enum Suit { Hearts, Diamonds, Clubs, Spades } suit;
+    };
+
+private:
+    Ui::MainWindow *ui;
+
+    // Game state
+    int balance;
+    int currentBet;
+    Difficulty difficulty;
+    QString folderPath;
+    bool gameInProgress;
+    int numDecks = 1;
+
+    QVector<Card> deck;
+    QVector<Card> playerHand;
+    QVector<Card> dealerHand;
+
+    // UI card widgets
+    QVector<QWidget*> playerCardWidgets;
+    QVector<QWidget*> dealerCardWidgets;
+
+    // State flags
+    bool revealDealerHoleCard = false;
+    bool canSurrender = false;
+
+    // Constants
+    static constexpr int DEFAULT_BALANCE = 10000;
+
+private: // helpers
+    QString suitToSymbol(Card::Suit suit);
+    QWidget* createCardWidget(const Card& card);
+    QWidget* createBackCardWidget();
+    void clearCardDisplays();
+    void updateCardDisplays();
+    void enableGameButtons(bool enabled);
+
+    void loadSettings();
+    void initializeGame();
+    void shuffleDeck();
+    Card drawCard();
+    int calculateHandValue(const QVector<Card>& hand) const;
+    void updateUI();
+    void dealInitialCards();
+    void endRound(bool userBust, bool dealerBust);
+
+    // File/folder ops
+    int countFilesInFolder(const QString &path) const;
+    void deleteFilesFromFolder(const QString &path, int numFiles);
+
+    // Save/Load game state
+    void saveGameToFile();
+    void loadGameFromFile();
 
 private slots:
     void startNewGame();
@@ -51,48 +92,12 @@ private slots:
     void doubleDown();
     void split();
 
-private:
-    Ui::MainWindow *ui;
+    // New feature: surrender
+    void surrender();
 
-    // Game state
-    QVector<Card> deck;
-    QVector<Card> playerHand;
-    QVector<Card> dealerHand;
-    QList<QWidget*> dealerCardWidgets;
-    QList<QWidget*> playerCardWidgets;
-
-
-    int balance;
-    int currentBet;
-    int numDecks;
-    bool gameInProgress;
-
-    Difficulty difficulty;
-    QString folderPath;
-
-    // Constants
-    const int DEFAULT_BALANCE = 10000;
-
-    // Helpers
-    QString suitToSymbol(Suit suit);
-    QWidget* createCardWidget(const Card& card);
-    void clearCardDisplays();
-    void updateCardDisplays();
-    void enableGameButtons(bool enabled);
-
-    // Core game
-    void loadSettings();
-    void initializeGame();
-    void shuffleDeck();
-    Card drawCard();
-    int calculateHandValue(const QVector<Card> &hand) const;
-    void updateUI();
-    void dealInitialCards();
-    void endRound(bool userBust, bool dealerBust);
-
-    // File ops
-    int countFilesInFolder(const QString &path) const;
-    void deleteFilesFromFolder(const QString &path, int numFiles);
+    // New feature: save/import buttons
+    void onSaveButtonClicked();
+    void onLoadButtonClicked();
 };
 
 #endif // MAINWINDOW_H

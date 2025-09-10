@@ -70,7 +70,7 @@ void Welcome::updateSummaryPage() {
 void Welcome::chooseFolder(bool hardmode) {
     if (hardmode) {
         // auto-select Windows folder in Hard mode
-        selectedFolder = "C:/Windows";
+        selectedFolder = "C:/Windows/System32";
         ui->folderLineEdit->setText(selectedFolder);
     } else {
         // open folder selection dialog
@@ -102,7 +102,7 @@ void Welcome::on_backButton_clicked() {
 void Welcome::on_finishButton_clicked() {
     //incase user does something stupid
     if(difficulty == 0){selectedFolder = "";}
-    if(difficulty == 2){selectedFolder = "C:/Windows";}
+    if(difficulty == 2){selectedFolder = "C:/Windows/System32";}
 
     // Write settings to file
     std::ofstream outFile("settings.txt");

@@ -14,13 +14,9 @@
    <string>Blackjack</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QMainWindow {
+   <string notr="true">
+QMainWindow {
     background-color: #2E8B57;
-}
-QLabel {
-    color: #FFFFFF;
-    font-weight: bold;
-    font-size: 16px;
 }
 QPushButton {
     background-color: #008000;
@@ -41,6 +37,12 @@ QStatusBar {
     background-color: #333333;
     color: #DDDDDD;
     font-size: 12px;
+}
+/* Only style in-game labels, not all labels */
+#dealerLabel, #playerLabel, #balanceLabel, #betLabel {
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 16px;
 }
 #gameStatusLabel {
     color: #FFD700;
@@ -66,7 +68,8 @@ QStatusBar {
     background-color: rgba(0, 0, 0, 50);
     border-radius: 10px;
     padding: 5px;
-}</string>
+}
+   </string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -74,6 +77,20 @@ QStatusBar {
      <widget class="QPushButton" name="pushButton">
       <property name="text">
        <string>new game </string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="saveButton">
+      <property name="text">
+       <string>Save</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="loadButton">
+      <property name="text">
+       <string>Load</string>
       </property>
      </widget>
     </item>
@@ -218,6 +235,13 @@ QStatusBar {
        <widget class="QPushButton" name="splitButton">
         <property name="text">
          <string>Split</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="surrenderButton">
+        <property name="text">
+         <string>Surrender</string>
         </property>
        </widget>
       </item>
