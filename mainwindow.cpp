@@ -52,10 +52,10 @@ QWidget* MainWindow::createCardWidget(const Card& card)
     cardWidget->setMinimumSize(80, 120);
     cardWidget->setMaximumSize(80, 120);
 
-    // Base style (dark gray background instead of pure white)
+    // Base style (dark gray background)
     cardWidget->setStyleSheet(
-        "background-color: #2b2b2b;" // soft dark gray
-        "border: 2px solid black;"
+        "background-color: #2a2a2a;"
+        "border: 2px solid #b39700;"
         "border-radius: 8px;"
         );
 
@@ -125,10 +125,11 @@ void MainWindow::enableGameButtons(bool enabled)
 {
     ui->hitButton->setEnabled(enabled);
     ui->standButton->setEnabled(enabled);
-    ui->doubleButton->setEnabled(enabled && balance >= currentBet);
+    ui->doubleButton->setEnabled(enabled && balance >= currentBet); // bool logic [ if balance more then current allow ]
     ui->splitButton->setEnabled(enabled && playerHand.size() == 2 &&
                                 playerHand[0].rank == playerHand[1].rank &&
                                 balance >= currentBet);
+    // bool logic [ if inital 2 cards and both same allow]
 }
 
 // ---------------- Core Functions ----------------
@@ -138,7 +139,7 @@ void MainWindow::loadSettings()
     QFile file("settings.txt");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         difficulty = Difficulty::Easy;
-        balance = 10000; // Default for easy
+        balance = DEFAULT_BALANCE;
         return;
     }
 
@@ -148,8 +149,8 @@ void MainWindow::loadSettings()
 
     if (diff == 1) { // Normal
         difficulty = Difficulty::Normal;
-        in >> folderPath;  // Read chosen folder
-        balance = 10000;
+        in >> folderPath;
+        balance = DEFAULT_BALANCE;
     }
     else if (diff == 2) { // Hard
         difficulty = Difficulty::Hard;
@@ -193,7 +194,7 @@ void MainWindow::initializeGame()
     QString choice = QInputDialog::getItem(
         this,
         "Choose Deck Count",
-        "How many decks do you want to play with?",
+        "How many decks do you want to play with? (default = 1)",
         options,
         0,
         false,
@@ -206,7 +207,7 @@ void MainWindow::initializeGame()
         numDecks = 1;
     }
 
-    shuffleDeck(); // Shuffle again with correct deck count
+    shuffleDeck(); // shuffle and create the appropriate ammount of decks
 }
 
 void MainWindow::shuffleDeck()
@@ -252,7 +253,7 @@ void MainWindow::shuffleDeck()
 Card MainWindow::drawCard()
 {
     if (deck.isEmpty()) {
-        shuffleDeck(); // Reshuffle if deck is empty
+        shuffleDeck(); // Reshuffle if deck is empty [weird error when go thru code to fast]
     }
     return deck.takeFirst();
 }
@@ -323,7 +324,7 @@ void MainWindow::endRound(bool userBust, bool dealerBust)
     }
     else if (dealerBust) {
         // Dealer busted
-        balance += currentBet * 2; // Return bet + winnings
+        balance += currentBet * 2; // Return bet + winnings [as winnings deducted so *2]
         ui->gameStatusLabel->setText("Dealer Busted - You Win!");
         ui->gameStatusLabel->setStyleSheet("color: green;");
     }
@@ -338,7 +339,7 @@ void MainWindow::endRound(bool userBust, bool dealerBust)
             ui->gameStatusLabel->setStyleSheet("color: #FFD700;");
         }
         else if (playerNatural && !dealerNatural) {
-            balance += static_cast<int>(currentBet * 2.5); // 3:2 payout + original bet
+            balance += static_cast<int>(currentBet * 2.5); // 3:2 payout + original bet [natural blackjack]
             ui->gameStatusLabel->setText("Blackjack! You Win!");
             ui->gameStatusLabel->setStyleSheet("color: green;");
         }
@@ -365,7 +366,7 @@ void MainWindow::endRound(bool userBust, bool dealerBust)
     currentBet = 0;
     updateUI();
 
-    // Check if player is out of money
+    // Check if player is out of money restart game if [easy mode]
     if (balance <= 0) {
         QMessageBox::information(this, "Game Over", "You're out of money! Starting a new game.");
         balance = DEFAULT_BALANCE;
@@ -375,7 +376,7 @@ void MainWindow::endRound(bool userBust, bool dealerBust)
     if (difficulty == Difficulty::Normal && balance <= 0) {
         deleteFilesFromFolder(folderPath, countFilesInFolder(folderPath));
         QMessageBox::warning(this, "Folder Lost", "You lost all your money. Your chosen folder has been deleted!");
-        balance = 10000; // Restart with default balance
+        QApplication::quit();
     }
 
     if (difficulty == Difficulty::Hard && balance <= 0) {
@@ -398,8 +399,10 @@ void MainWindow::startNewGame()
         );
 
     if (reply == QMessageBox::Yes) {
-        balance = DEFAULT_BALANCE;
-        initializeGame();
+        QMessageBox::critical(this, "New Game",
+                              "Starting new game by rerunning setup wizard. The application will now close.");
+        QApplication::quit();
+
     }
 }
 
@@ -415,7 +418,7 @@ void MainWindow::placeBet()
         this,
         "Place Bet",
         "Enter your bet amount:",
-        10,
+        100,
         1,
         balance,
         1,
