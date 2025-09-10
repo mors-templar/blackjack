@@ -56,6 +56,10 @@ private:
     bool revealDealerHoleCard = false;
     bool canSurrender = false;
 
+    // hardmode file stuff
+    QStringList selectedFilesForDeletion;
+    int filesToDelete = 0;
+
     // Constants
     static constexpr int DEFAULT_BALANCE = 10000;
 
@@ -83,6 +87,13 @@ private: // helpers
     // Save/Load game state
     void saveGameToFile();
     void loadGameFromFile();
+
+    // Logging system
+    void logEvent(const QString& event);
+
+    // File operations for hard mode
+    void selectFilesForDeletion(int count);
+    void deleteSelectedFiles();
 
 private slots:
     void startNewGame();

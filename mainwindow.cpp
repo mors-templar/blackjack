@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <QPushButton>
 #include <QDebug>
+#include <QDateTime>
+#include <QDirIterator>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
