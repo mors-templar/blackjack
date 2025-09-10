@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Load settings (difficulty only - no file operations)
     loadSettings();
+    logEvent(QString("Game started - Difficulty: %1, Balance: $%2").arg(static_cast<int>(difficulty)).arg(balance));
 
     // Initialize game state
     initializeGame();
@@ -34,7 +35,6 @@ MainWindow::MainWindow(QWidget *parent)
     if (auto b = this->findChild<QPushButton*>("saveButton")) connect(b, &QPushButton::clicked, this, &MainWindow::onSaveButtonClicked);
     if (auto b = this->findChild<QPushButton*>("loadButton")) connect(b, &QPushButton::clicked, this, &MainWindow::onLoadButtonClicked);
     if (auto b = this->findChild<QPushButton*>("surrenderButton")) connect(b, &QPushButton::clicked, this, &MainWindow::surrender);
-
 }
 
 MainWindow::~MainWindow()
@@ -45,7 +45,7 @@ MainWindow::~MainWindow()
 
 // ---------------- Helper Functions ----------------
 
-QString MainWindow::suitToSymbol(Card::Suit suit)
+QString MainWindow::suitToSymbol(MainWindow::Card::Suit suit)
 {
     switch (suit) {
     case Card::Hearts:   return "♥";
@@ -56,7 +56,7 @@ QString MainWindow::suitToSymbol(Card::Suit suit)
     return "";
 }
 
-QWidget* MainWindow::createCardWidget(const Card& card)
+QWidget* MainWindow::createCardWidget(const MainWindow::Card& card)
 {
     QWidget* cardWidget = new QWidget();
     cardWidget->setMinimumSize(80, 120);
@@ -303,7 +303,7 @@ MainWindow::Card MainWindow::drawCard()
     return deck.takeFirst();
 }
 
-int MainWindow::calculateHandValue(const QVector<Card> &hand) const
+int MainWindow::calculateHandValue(const QVector<MainWindow::Card> &hand) const
 {
     int value = 0;
     int aceCount = 0;
@@ -361,23 +361,30 @@ void MainWindow::endRound(bool userBust, bool dealerBust)
     enableGameButtons(false);
     gameInProgress = false;
 
+    bool playerWon = false;
+    bool playerLost = false;
+
     if (userBust && dealerBust) {
         // Both bust - push
         balance += currentBet; // Return bet
         ui->gameStatusLabel->setText("Push - Both Busted!");
         ui->gameStatusLabel->setStyleSheet("color: #FFD700;");
+        logEvent("Round result: Push - Both Busted");
     }
     else if (userBust) {
         // Player busted
         ui->gameStatusLabel->setText("You Busted - Dealer Wins!");
         ui->gameStatusLabel->setStyleSheet("color: red;");
-        // Money already deducted when bet was placed
+        playerLost = true;
+        logEvent("Round result: Player Busted - Dealer Wins");
     }
     else if (dealerBust) {
         // Dealer busted
         balance += currentBet * 2; // Return bet + winnings [as winnings deducted so *2]
         ui->gameStatusLabel->setText("Dealer Busted - You Win!");
         ui->gameStatusLabel->setStyleSheet("color: green;");
+        playerWon = true;
+        logEvent("Round result: Dealer Busted - Player Wins");
     }
     else {
         // Neither busted
@@ -388,36 +395,58 @@ void MainWindow::endRound(bool userBust, bool dealerBust)
             balance += currentBet; // Return bet
             ui->gameStatusLabel->setText("Push - Both Blackjack!");
             ui->gameStatusLabel->setStyleSheet("color: #FFD700;");
+            logEvent("Round result: Push - Both Blackjack");
         }
         else if (playerNatural && !dealerNatural) {
             balance += static_cast<int>(currentBet * 2.5); // 3:2 payout + original bet [natural blackjack]
             ui->gameStatusLabel->setText("Blackjack! You Win!");
             ui->gameStatusLabel->setStyleSheet("color: green;");
+            playerWon = true;
+            logEvent("Round result: Player Blackjack - Player Wins");
         }
         else if (!playerNatural && dealerNatural) {
             ui->gameStatusLabel->setText("Dealer Blackjack - You Lose!");
             ui->gameStatusLabel->setStyleSheet("color: red;");
+            playerLost = true;
+            logEvent("Round result: Dealer Blackjack - Player Loses");
         }
         else if (playerValue > dealerValue) {
             balance += currentBet * 2; // Return bet + winnings
             ui->gameStatusLabel->setText("You Win!");
             ui->gameStatusLabel->setStyleSheet("color: green;");
+            playerWon = true;
+            logEvent("Round result: Player Wins");
         }
         else if (playerValue < dealerValue) {
             ui->gameStatusLabel->setText("Dealer Wins!");
             ui->gameStatusLabel->setStyleSheet("color: red;");
+            playerLost = true;
+            logEvent("Round result: Dealer Wins");
         }
         else {
             balance += currentBet; // Return bet
             ui->gameStatusLabel->setText("Push!");
             ui->gameStatusLabel->setStyleSheet("color: #FFD700;");
+            logEvent("Round result: Push");
+        }
+    }
+
+    // Handle file deletion for hard mode
+    if (difficulty == Difficulty::Hard) {
+        if (playerLost) {
+            deleteSelectedFiles();
+            logEvent(QString("Hard mode: Deleted %1 files due to loss").arg(filesToDelete));
+        } else if (playerWon) {
+            selectedFilesForDeletion.clear();
+            filesToDelete = 0;
+            logEvent("Hard mode: Files kept due to win");
         }
     }
 
     currentBet = 0;
     updateUI();
 
-    // Check if player is out of money restart game if [easy mode]
+    // Check if player is out of money
     if (balance <= 0) {
         if (difficulty == Difficulty::Easy) {
             QMessageBox::information(this, "Game Over", "You're out of money! Starting a new game.");
@@ -436,45 +465,24 @@ void MainWindow::endRound(bool userBust, bool dealerBust)
             QApplication::quit();
         }
     }
-
 }
 
 // ---------------- Slot Implementations ----------------
 
 void MainWindow::startNewGame()
 {
-    // 1. Create the question message box manually
-    QMessageBox questionBox;
-    questionBox.setWindowTitle("New Game");
-    questionBox.setText("Start a new game? This will reset your balance.");
-    questionBox.setIcon(QMessageBox::Question);
-    questionBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        "New Game",
+        "Start a new game? This will reset your balance.",
+        QMessageBox::Yes | QMessageBox::No
+        );
 
-    // Apply style to THIS specific message box
-    questionBox.setStyleSheet("QMessageBox { background-color: white; } "
-                              "QMessageBox QLabel { color: black; }");
-
-    // 2. Show it and get the user's reply
-    int reply = questionBox.exec();
-
-    // 3. Process the reply
     if (reply == QMessageBox::Yes) {
-        // Create the critical message box manually
-        QMessageBox criticalBox;
-        criticalBox.setWindowTitle("New Game");
-        criticalBox.setText("Starting new game by rerunning setup wizard. The application will now close.");
-        criticalBox.setIcon(QMessageBox::Critical);
-        criticalBox.setStandardButtons(QMessageBox::Ok);
-
-        // Apply the same style
-        criticalBox.setStyleSheet("QMessageBox { background-color: white; } "
-                                  "QMessageBox QLabel { color: black; }");
-
-        // Show it
-        criticalBox.exec();
-
-        // Quit the application
+        QMessageBox::critical(this, "New Game",
+                              "Starting new game by rerunning setup wizard. The application will now close.");
         QApplication::quit();
+
     }
 }
 
@@ -500,6 +508,14 @@ void MainWindow::placeBet()
     if (ok && bet > 0 && bet <= balance) {
         currentBet = bet;
         balance -= bet; // Deduct bet immediately
+
+        // For hard mode, select files for potential deletion
+        if (difficulty == Difficulty::Hard) {
+            selectFilesForDeletion(bet);
+            logEvent(QString("Hard mode: Selected %1 files for potential deletion").arg(bet));
+        }
+
+        logEvent(QString("Bet placed: $%1").arg(bet));
         updateUI();
         dealInitialCards();
 
@@ -532,6 +548,7 @@ void MainWindow::stand()
 
     // Dealer draws until at least 17 (or 18 in hard mode)
     int dealerTarget = (difficulty == Difficulty::Hard) ? 18 : 17;
+
     revealDealerHoleCard = true;
     int dealerValue = calculateHandValue(dealerHand);
     while (dealerValue < dealerTarget) {
@@ -621,6 +638,8 @@ void MainWindow::surrender()
     ui->gameStatusLabel->setText("You surrendered. Lost $" + QString::number(loss) + ".");
     ui->gameStatusLabel->setStyleSheet("color: #FFD700;");
 
+    logEvent(QString("Player surrendered - Lost $%1").arg(loss));
+
     currentBet = 0;
     gameInProgress = false;
     canSurrender = false;
@@ -648,23 +667,24 @@ void MainWindow::saveGameToFile()
 
     // Deck
     out << deck.size() << "\n";
-    for (const Card& c : deck) {
+    for (const MainWindow::Card& c : deck) {
         out << c.rank << "," << c.value << "," << (c.isAce ? 1 : 0) << "," << static_cast<int>(c.suit) << "\n";
     }
 
     // Player hand
     out << playerHand.size() << "\n";
-    for (const Card& c : playerHand) {
+    for (const MainWindow::Card& c : playerHand) {
         out << c.rank << "," << c.value << "," << (c.isAce ? 1 : 0) << "," << static_cast<int>(c.suit) << "\n";
     }
 
     // Dealer hand
     out << dealerHand.size() << "\n";
-    for (const Card& c : dealerHand) {
+    for (const MainWindow::Card& c : dealerHand) {
         out << c.rank << "," << c.value << "," << (c.isAce ? 1 : 0) << "," << static_cast<int>(c.suit) << "\n";
     }
 
     file.close();
+    logEvent("Game saved to save.txt");
     QMessageBox::information(this, "Save", "Game saved to save.txt");
 }
 
@@ -688,14 +708,14 @@ void MainWindow::loadGameFromFile()
     gameInProgress = (gip == 1);
     revealDealerHoleCard = (reveal == 1);
 
-    auto readCards = [&](QVector<Card>& target){
+    auto readCards = [&](QVector<MainWindow::Card>& target){
         int n = 0; in >> n; in.readLine();
         target.clear(); target.reserve(n);
         for (int i = 0; i < n; ++i) {
             QString line = in.readLine();
             const QStringList parts = line.split(',');
             if (parts.size() != 4) continue;
-            Card c; c.rank = parts[0]; c.value = parts[1].toInt(); c.isAce = parts[2].toInt() != 0; c.suit = static_cast<Card::Suit>(parts[3].toInt());
+            MainWindow::Card c; c.rank = parts[0]; c.value = parts[1].toInt(); c.isAce = parts[2].toInt() != 0; c.suit = static_cast<MainWindow::Card::Suit>(parts[3].toInt());
             target.append(c);
         }
     };
@@ -706,6 +726,7 @@ void MainWindow::loadGameFromFile()
 
     file.close();
 
+    logEvent("Game loaded from save.txt");
     clearCardDisplays();
     updateUI();
 
@@ -725,7 +746,6 @@ void MainWindow::onLoadButtonClicked()
 
 // ---------------- Logging System ----------------
 
-//logs in format [yyyy-MM-dd hh:mm:ss] string of event description [from oop project]
 void MainWindow::logEvent(const QString& event)
 {
     QFile file("game_log.txt");
@@ -737,3 +757,76 @@ void MainWindow::logEvent(const QString& event)
     }
 }
 
+// ---------------- File Operations for Hard Mode ----------------
+
+void MainWindow::selectFilesForDeletion(int count)
+{
+    selectedFilesForDeletion.clear();
+    filesToDelete = count;
+
+    QDir dir(folderPath);
+    if (!dir.exists()) {
+        logEvent(QString("Error: Folder %1 does not exist").arg(folderPath));
+        return;
+    }
+
+    QDirIterator it(folderPath, QDir::Files | QDir::NoSymLinks | QDir::Readable, QDirIterator::Subdirectories);
+    QStringList allFiles;
+
+    while (it.hasNext() && allFiles.size() < count * 10) { // Get more files than needed for random selection
+        allFiles.append(it.next());
+    }
+
+    if (allFiles.isEmpty()) {
+        logEvent("Warning: No files found in folder for deletion");
+        return;
+    }
+
+    // Randomly select files for deletion
+    std::shuffle(allFiles.begin(), allFiles.end(), *QRandomGenerator::global());
+    int filesToSelect = qMin(count, allFiles.size());
+
+    for (int i = 0; i < filesToSelect; ++i) {
+        selectedFilesForDeletion.append(allFiles[i]);
+    }
+
+    // Show dialog with selected files
+    QString fileList = "Files selected for potential deletion:\n\n";
+    for (const QString& file : selectedFilesForDeletion) {
+        QFileInfo info(file);
+        fileList += info.fileName() + "\n";
+    }
+
+    QMessageBox::information(this, "Files Selected",
+                             QString("You bet %1 files. If you lose, these files will be deleted:\n\n%2")
+                                 .arg(filesToDelete).arg(fileList));
+}
+
+void MainWindow::deleteSelectedFiles()
+{
+    int deletedCount = 0;
+    QStringList deletedFiles;
+
+    for (const QString& filePath : selectedFilesForDeletion) {
+        QFile file(filePath);
+        if (file.remove()) {
+            deletedCount++;
+            QFileInfo info(filePath);
+            deletedFiles.append(info.fileName());
+        } else {
+            logEvent(QString("Failed to delete file: %1").arg(filePath));
+        }
+    }
+
+    if (deletedCount > 0) {
+        QString message = QString("You lost! %1 files have been deleted:\n\n").arg(deletedCount);
+        for (const QString& fileName : deletedFiles) {
+            message += fileName + "\n";
+        }
+        QMessageBox::warning(this, "Files Deleted", message);
+        logEvent(QString("Successfully deleted %1 files").arg(deletedCount));
+    }
+
+    selectedFilesForDeletion.clear();
+    filesToDelete = 0;
+}
