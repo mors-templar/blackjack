@@ -15,6 +15,7 @@ qt_add_executable(blackjack_twist
     welcome.cpp
     welcome.ui
     test
+    readme.md
 
 )
 

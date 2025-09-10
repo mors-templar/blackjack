@@ -529,7 +529,6 @@ void MainWindow::stand()
 
     // Dealer draws until at least 17 (or 18 in hard mode)
     int dealerTarget = (difficulty == Difficulty::Hard) ? 18 : 17;
-
     revealDealerHoleCard = true;
     int dealerValue = calculateHandValue(dealerHand);
     while (dealerValue < dealerTarget) {
